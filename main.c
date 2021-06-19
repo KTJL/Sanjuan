@@ -32,6 +32,8 @@ int main(void) {
 		w = welcome();
 	}
   //遊戲開啟
+	int32_t tradecards[5] = {0};
+	int8_t trademk = 0;
 	if(w == 2)
 	{
 		printf("遊戲開始!( Ctrl+C 可隨時結束遊戲:) )\n\n");
@@ -43,6 +45,15 @@ int main(void) {
     playernum = 4;
 	  printf("你的號碼為: %d號\n\n", playernum);
 		start(&player_list_head_1, &player_list_head_2, &player_list_head_3, &player_list_head_4, &build_list_head_1, &build_list_head_2, &build_list_head_3, &build_list_head_4);//開始
+		
+		for(int32_t i = 0;i<5;i++){//洗價物牌
+			tradecards[i] = rand()%5;
+			while(((trademk >> tradecards[i]) & 1) == 1){
+				tradecards[i] = rand()%5;
+			}
+			trademk = trademk|(1 << tradecards[i]);
+			//printf("tradetest: %d\n", tradecards[i]);
+		}
 		sleep(3);
 	}
 	
@@ -51,7 +62,7 @@ int main(void) {
 
   for(int32_t i = 0;i<5;i++)
 	{
-		gameround(roundnum, playernum, &player_list_head_1, &player_list_head_2, &player_list_head_3, &player_list_head_4, &build_list_head_1, &build_list_head_2, &build_list_head_3, &build_list_head_4);
+		gameround(roundnum, playernum, tradecards[roundnum%5], &player_list_head_1, &player_list_head_2, &player_list_head_3, &player_list_head_4, &build_list_head_1, &build_list_head_2, &build_list_head_3, &build_list_head_4);
 		roundnum++;
 	}
   

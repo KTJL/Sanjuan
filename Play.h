@@ -27,7 +27,7 @@ void start(struct list_head *player_list_head_1, struct list_head *player_list_h
 
 _splayer_card *add_newcard(_sbuild *building);
 _sbuild *draw_card();
-void gameround(int32_t roundnum, const int32_t playernum, struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4);
+void gameround(int32_t roundnum, const int32_t playernum, const int32_t tradecardnum, struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4);
 
 void print_table(struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4,struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4, const int32_t player);//畫面
 int32_t print_handcard(struct list_head *player_list_head, const int32_t player);//印手牌、計算卡數
@@ -49,22 +49,23 @@ void Quarry(int32_t *feeptr, const int32_t player);
 void build_Library(int32_t *feeptr, const int32_t player);
 //生產者
 void Producer_func(const int32_t sp, const int32_t player, struct list_head *player_list_head, struct list_head *build_list_head, int32_t facnum);
-int32_t normal_produce();
+int32_t normal_produce(_splayer_card *choosecard, struct list_head *build_list_head,const int32_t player);
 void Well(struct list_head *player_list_head, const int32_t player);
 void Aqueduct(int32_t *comptr, const int32_t player);
-void produce_Library(int32_t *comptr, int32_t facnum, const int32_t player);/*
+void produce_Library(int32_t *comptr, int32_t facnum, const int32_t player);
 //商人
-void Trader_func(const int32_t sp, const int32_t player, struct list_head *player_list_head, struct list_head *build_list_head);
-int32_t normal_trade();
-void Market_stand();
-void Trading_post();
-void trade_Library();*/
+void Trader_func(const int32_t sp, const int32_t player, const int32_t tradecardnum, struct list_head *player_list_head, struct list_head *build_list_head, int32_t commodnum);
+int32_t normal_trade(_splayer_card *choosecard, struct list_head *player_list_head,const int32_t player, const int32_t tradecardnum);
+void Market_stand(struct list_head *player_list_head, const int32_t player);
+void Market_hall(struct list_head *player_list_head, const int32_t player);
+void Trading_post(int32_t *soldptr, const int32_t player);
+void trade_Library(int32_t *soldptr, int32_t commodnum, const int32_t player);
 //市長
-void Counciler_func(const int32_t sp, const int32_t player, struct list_head *player_list_head, struct list_head *build_list_head);
-int32_t normal_councile(const int32_t chosenum, const int32_t drawnum, struct list_head *player_list_head, const int32_t player, const int32_t ar); 
+void Councilor_func(const int32_t sp, const int32_t player, struct list_head *player_list_head, struct list_head *build_list_head);
+int32_t normal_council(const int32_t chosenum, const int32_t drawnum, struct list_head *player_list_head, const int32_t player, const int32_t ar); 
 int32_t Archive(const int32_t player);
 void Prefecture(int32_t *choseptr, const int32_t player);
-void councile_Library(int32_t *drawptr, const int32_t player);
+void council_Library(int32_t *drawptr, const int32_t player);
 //淘金者
 void Prospector_func(const int32_t player, struct list_head *player_list_head, struct list_head *build_list_head);
 int32_t normal_prospect(int32_t drawnum, struct list_head *player_list_head);

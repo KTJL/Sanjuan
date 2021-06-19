@@ -116,10 +116,10 @@ _sbuild *draw_card()//抽卡
 	return drawcard;
 }
 
-void gameround(int32_t roundnum, const int32_t playernum, struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4)
+void gameround(int32_t roundnum, const int32_t playernum, const int32_t tradecardnum, struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4)
 {
 	printf("-----------------\nRound %d\n\n", roundnum);
-
+ 
 	int32_t mayor = roundnum%4;
 	if(mayor == 0)
 	{
@@ -132,7 +132,7 @@ void gameround(int32_t roundnum, const int32_t playernum, struct list_head *play
 	//檢查牌數、禮拜堂
 	if(roundnum >= 2)
 	{
-		
+
 	}
 	//選角、執行
 	uint32_t player_role[4] = {0};
@@ -240,9 +240,60 @@ void gameround(int32_t roundnum, const int32_t playernum, struct list_head *play
 		}
 		else if(player_role[i%4]-1 == Trader)
 		{
-			//Trader_func();
+			for(int32_t j = i%4;j < (i%4) + 4;j++)
+			{
+				if(j%4 == 0)printf("---\n 4 號玩家\n");
+				else printf("---\n %d 號玩家\n", j%4);
+				if(playernum%4 != j%4) sleep(5);
+
+				int32_t commodnum = 0;
+				if(j %4 == 0){
+					struct list_head *listptr = NULL;					
+					list_for_each(listptr, build_list_head_4)//是否有貨物
+					{
+						_splayer_card *cptr =  list_entry(listptr, _splayer_card, list);
+						if(cptr->commodity == 1)
+						commodnum ++;
+					}
+					if(commodnum != 0)
+					Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_4, build_list_head_4, commodnum);
+				}
+				else if(j %4 == 1){
+					struct list_head *listptr = NULL;					
+					list_for_each(listptr, build_list_head_1)//是否有貨物
+					{
+						_splayer_card *cptr =  list_entry(listptr, _splayer_card, list);
+						if(cptr->commodity == 1)
+						commodnum ++;
+					}
+					if(commodnum != 0)
+					Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_1, build_list_head_1, commodnum);
+				}
+				else if(j %4 == 2){
+					struct list_head *listptr = NULL;					
+					list_for_each(listptr, build_list_head_2)//是否有貨物
+					{
+						_splayer_card *cptr =  list_entry(listptr, _splayer_card, list);
+						if(cptr->commodity == 1)
+						commodnum ++;
+					}
+					if(commodnum != 0)
+					Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_2, build_list_head_2, commodnum);
+				}
+				else if(j %4 == 3){
+					struct list_head *listptr = NULL;					
+					list_for_each(listptr, build_list_head_3)//是否有貨物
+					{
+						_splayer_card *cptr =  list_entry(listptr, _splayer_card, list);
+						if(cptr->commodity == 1)
+						commodnum ++;
+					}
+					if(commodnum != 0)
+					Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_3, build_list_head_3, commodnum);
+				}
+			}
 		}
-		else if(player_role[i%4]-1 == Counciler)
+		else if(player_role[i%4]-1 == Councilor)
 		{
 			for(int32_t j = i%4;j < (i%4) + 4;j++)
 			{
@@ -251,13 +302,13 @@ void gameround(int32_t roundnum, const int32_t playernum, struct list_head *play
 				if(playernum%4 != j%4) sleep(5);
 
 				if(j%4 == 0)
-				Counciler_func(j == i%4, playernum%4 == j%4,  player_list_head_4, build_list_head_4);
+				Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_4, build_list_head_4);
 				else if(j%4 == 1)
-        Counciler_func(j == i%4, playernum%4 == j%4,  player_list_head_1, build_list_head_1);
+        Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_1, build_list_head_1);
 				else if(j%4 == 2)
-				Counciler_func(j == i%4, playernum%4 == j%4,  player_list_head_2, build_list_head_2);
+				Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_2, build_list_head_2);
 				else if(j%4 == 3)
-				Counciler_func(j == i%4, playernum%4 == j%4,  player_list_head_3, build_list_head_3);
+				Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_3, build_list_head_3);
 			}
 		}
 		else if(player_role[i%4]-1 == Prospector)
@@ -291,7 +342,7 @@ uint32_t choose_role(uint32_t *choseptr, uint32_t player)//選角
 		printf("2) 生產者\n");
 		if(((*choseptr >> (Trader+1)) & 1) == 0)
 		printf("3) 商人\n");
-		if(((*choseptr >> (Counciler+1)) & 1) == 0)
+		if(((*choseptr >> (Councilor+1)) & 1) == 0)
 		printf("4) 市長\n");
 		if(((*choseptr >> (Prospector+1)) & 1) == 0)
 		printf("5) 淘金者\n");
@@ -308,7 +359,7 @@ uint32_t choose_role(uint32_t *choseptr, uint32_t player)//選角
 			printf("2) 生產者\n");
 			if(((*choseptr >> (Trader+1)) & 1) == 0)
 			printf("3) 商人\n");
-			if(((*choseptr >> (Counciler+1)) & 1) == 0)
+			if(((*choseptr >> (Councilor+1)) & 1) == 0)
 			printf("4) 市長\n");
 			if(((*choseptr >> (Prospector+1)) & 1) == 0)
 			printf("5) 淘金者\n");
@@ -524,10 +575,7 @@ void Builder_func(const int32_t sp, const int32_t player,  struct list_head *pla
       
 		if(action == 1)
 		{
-			int32_t count = 0;//手牌不超過1張
-			listptr = NULL;
-			list_for_each(listptr, player_list_head)
-			count++;
+			int32_t count = print_handcard(player_list_head, 0);//手牌不超過1張
 			if(((sp_building >> 9) & 1 )== 1 && count <= 1)
 			Poor_house(player_list_head, player);//救濟院
 		}
@@ -815,8 +863,8 @@ void Producer_func(const int32_t sp, const int32_t player, struct list_head *pla
 		}
 	} 
     
-	int32_t action = 2;
-	while(option == 1 && action == 2)
+	int32_t action = 0;
+	while(option == 1 && action == 0)
 	{
 		int32_t commodnum = 1;
 		int32_t *comptr = &commodnum;
@@ -861,28 +909,19 @@ void Producer_func(const int32_t sp, const int32_t player, struct list_head *pla
 				}
 				else if(option == 2)
 				break;
+				
 			}
 			else
-			action = normal_produce(choosecard, build_list_head, player);//生產行動
+			action += normal_produce(choosecard, build_list_head, player);//生產行動
 		}
 
-		int32_t commod = 0;//是否有貨物
-		listptr = NULL;
-		list_for_each(listptr, build_list_head)
-		{
-			_splayer_card *cptr =  list_entry(listptr, _splayer_card, list);
-			if(cptr->commodity == 1)
-			{
-				commod ++;
-			}
-  	}
-		if(((sp_building >> 14) & 1 )== 1 && commod >= 2 )
+		if(((sp_building >> 14) & 1 )== 1 && action >= 2 )
 		Well(player_list_head, player);//水井
 	}
 
 	return;
 }
-int32_t normal_produce(_splayer_card *choosecard, struct list_head *build_list_head, int32_t player){
+int32_t normal_produce(_splayer_card *choosecard, struct list_head *build_list_head, const int32_t player){
 	choosecard->commodity = 1;
 	_sbuild *commod = draw_card();
 	commod->num --;
@@ -961,8 +1000,235 @@ void produce_Library(int32_t *comptr, int32_t facnum, const int32_t player){
 	
 	return;
 }
+//商人
+void Trader_func(const int32_t sp, const int32_t player, const int32_t tradecardnum, struct list_head *player_list_head, struct list_head *build_list_head, int32_t commodnum){
+	Player{
+		printf("你的手牌:\n");
+		print_handcard(player_list_head, 1);
+	}
+	int32_t sp_building = 0;//是否有特殊建築
+	struct list_head *listptr = NULL;
+	list_for_each(listptr, build_list_head)
+	{
+		_splayer_card *bptr = list_entry(listptr, _splayer_card, list);
+		if((bptr->id >= 16 && bptr->id <= 18) || bptr->id == 22)
+		{
+			sp_building = sp_building | (1 << bptr->id);
+		}
+	}
+
+  int8_t sp_option = 0;
+	int8_t option = 0;
+	printf("\n是否執行一般行動-賣出1個貨品(即丟棄1張置於自家生產建築下方的卡牌，並從卡牌堆上方抽取對應貨品價格數量張數的卡牌加入手牌)\n1)是 2)否\n(請輸入數字進行選擇):");
+	
+	Player{
+		while(scanf("%hhd", &option) != 1 || option > 2 || option < 1)
+		{
+			char c;
+	  	while (( c = getchar()) != EOF && c != '\n'){}
+			printf("選擇無效!是否執行一般行動-賣出1個貨品(即丟棄1張置於自家生產建築下方的卡牌，並從卡牌堆上方抽取對應貨品價格數量張數的卡牌加入手牌)\n1)是 2)否\n(請輸入數字進行選擇):");
+		}
+	}
+	Robot{
+		option = rand()%2 + 1;
+		printf("%d\n", option);
+	}
+
+
+	if(sp == 1 && option == 1 && commodnum > 1)//選擇特權
+	{
+		printf("\n是否執行特權行動-可賣出2個貨品(即丟棄2張置於自家生產建築下方的卡牌，並從卡牌堆上方抽取對應貨品價格數量張數的卡牌加入手牌)?\n1)是 2)否\n(請輸入數字進行選擇):");
+
+		Player{
+			while(scanf("%hhd", &sp_option) != 1 || sp_option > 2 || sp_option < 1)
+			{
+				char c;
+	  		while (( c = getchar()) != EOF && c != '\n'){}
+				printf("選擇無效!可賣出2個貨品(即丟棄2張置於自家生產建築下方的卡牌，並從卡牌堆上方抽取對應貨品價格數量張數的卡牌加入手牌)?\n1)是 2)否\n(請輸入數字進行選擇):");
+			}
+		}
+		Robot{
+			sp_option = rand()%2 + 1;
+			printf("%d\n", sp_option);
+		}
+	} 
+    
+	int32_t action = 0;
+	while(option == 1 && action == 0)
+	{
+		int32_t soldnum = 1;
+		int32_t *soldptr = &soldnum;
+		//特殊功能
+		if(sp_option == 1 && commodnum > soldnum)//特權
+		soldnum ++;
+		if(((sp_building >> 18) & 1 )== 1  && commodnum > soldnum)
+		Trading_post(soldptr, player);//交易所
+    if(((sp_building >> 22) & 1 )== 1 && commodnum > soldnum && soldnum < 3 && sp == 1)//圖書館
+		trade_Library(soldptr, commodnum, player);
+		
+		for(int32_t i = 0;i < soldnum;i++){//賣貨
+
+			_splayer_card *choosecard = choose_card(build_list_head, player);
+			if(choosecard == NULL)
+			{
+				printf("選擇失敗!\n");
+				break;
+			}
+
+			if(choosecard-> commodity != 1){//無法賣貨
+				
+				printf("\n該建築無法販賣貨物!\n1)重新選擇\n2)放棄執行(已販賣貨物無法回復)\n(請輸入數字進行選擇):");
+				
+				Player{
+					while(scanf("%hhd", &option) != 1 || option > 2 || option < 1)
+					{
+						char c;
+	  				while (( c = getchar()) != EOF && c != '\n'){}
+						printf("選擇無效!該建築無法販賣貨物!\n1)重新選擇\n2)放棄執行(已販賣貨物無法回復)\n(請輸入數字進行選擇):");
+					} 
+				}
+				Robot{
+					option = rand()%2 + 1;
+					printf("%d\n", option);
+				}
+
+				if(option == 1)
+				{
+					i--;
+					continue;
+				}
+				else if(option == 2)
+				break;
+			}
+			else
+			action += normal_trade(choosecard, player_list_head, player, tradecardnum);//販賣行動
+		}
+    
+		if(((sp_building >> 17) & 1 )== 1 && action != 0 )
+		Market_hall(player_list_head, player);//市場
+		if(((sp_building >> 16) & 1 )== 1 && action >= 2 )
+		Market_stand(player_list_head, player);//攤販
+	}
+
+	return;
+}
+int32_t normal_trade(_splayer_card *choosecard, struct list_head *player_list_head,const int32_t player, const int32_t tradecardnum){
+
+	choosecard->commodity = 0;
+
+	int32_t money = valuecards[tradecardnum].value[choosecard->id - 1];
+	for(int32_t i = 0;i<money;i++){//拿錢
+		_sbuild *drawcard = draw_card();
+		_splayer_card *newcard = add_newcard(drawcard);
+		list_add(&(newcard->list), player_list_head);
+
+		drawcard->num --;
+	}
+	
+	return 1;
+}
+void Market_stand(struct list_head *player_list_head, const int32_t player){
+	int8_t option = 0;
+	
+	Player{
+		printf("\n你有攤販!是否執行特殊行動-%s\n1)是 2)否\n(請輸入數字進行選擇):", building[15].tip);
+		while(scanf("%hhd", &option) != 1 || option > 2 || option < 1)
+		{
+			char c;
+	  	while (( c = getchar()) != EOF && c != '\n'){}
+			printf("無效選擇!你有攤販!是否執行特殊行動-%s\n1)是 2)否\n(請輸入數字進行選擇):", building[15].tip);
+		}	
+	}
+	Robot{
+		option = rand()%2 + 1;
+	}
+	
+	if(option == 1)
+	{
+		_sbuild *drawcard = draw_card();
+		_splayer_card *newcard = add_newcard(drawcard);
+		list_add(&(newcard->list), player_list_head);
+
+		drawcard->num --;
+	}
+
+	return;
+}
+void Market_hall(struct list_head *player_list_head, const int32_t player){
+	int8_t option = 0;
+	
+	Player{
+		printf("\n你有市場!是否執行特殊行動-%s\n1)是 2)否\n(請輸入數字進行選擇):", building[16].tip);
+		while(scanf("%hhd", &option) != 1 || option > 2 || option < 1)
+		{
+			char c;
+	  	while (( c = getchar()) != EOF && c != '\n'){}
+			printf("無效選擇!你有市場!是否執行特殊行動-%s\n1)是 2)否\n(請輸入數字進行選擇):", building[16].tip);
+		}	
+	}
+	Robot{
+		option = rand()%2 + 1;
+	}
+	
+	if(option == 1)
+	{
+		_sbuild *drawcard = draw_card();
+		_splayer_card *newcard = add_newcard(drawcard);
+		list_add(&(newcard->list), player_list_head);
+
+		drawcard->num --;
+	}
+
+	return;
+}
+void Trading_post(int32_t *soldptr, const int32_t player){
+	int8_t option = 0;
+
+	Player{
+		printf("\n你有交易所!是否執行特殊行動-%s\n1)是 2)否\n(請輸入數字進行選擇):", building[17].tip);
+		while(scanf("%hhd", &option) != 1 || option > 2 || option < 1)
+		{
+			char c;
+	  	while (( c = getchar()) != EOF && c != '\n'){}
+			printf("無效選擇!你有交易所!是否執行特殊行動-%s\n1)是 2)否\n(請輸入數字進行選擇):", building[17].tip);
+		}	
+	}
+	Robot{
+		option = rand()%2 + 1;
+	}
+
+	if(option == 1)
+	*soldptr += 1;
+
+	return;
+}
+void trade_Library(int32_t *soldptr, int32_t commodnum, const int32_t player){
+	int8_t option = 0;
+
+	Player{
+		printf("\n你有圖書館!是否執行特殊行動-至多賣出3個貨物\n生產 1)1個 2)2個 3)3個 4)否\n(請輸入數字進行選擇):");
+		while(scanf("%hhd", &option) != 1 || option > 4 || option < 1 || (option != 4 &&(option > commodnum || option <= *soldptr)) )
+		{
+			char c;
+	  	while (( c = getchar()) != EOF && c != '\n'){}
+			printf("無效選擇!你有圖書館!是否執行特殊行動-至多生產賣出貨物s\n生產 1)1個 2)2個 3)3個 4)否\n(請輸入數字進行選擇):");
+		}
+	}
+	Robot{
+		option = rand()%4 + 1;
+		while(option != 4 && (option > commodnum || option <= *soldptr))
+		option = rand()%4 + 1;
+	}
+	
+	if(option <= 3 )
+	{
+		*soldptr = option;
+	}
+	
+	return;
+}
 //市長
-void Counciler_func(const int32_t sp, const int32_t player, struct list_head *player_list_head, struct list_head *build_list_head){
+void Councilor_func(const int32_t sp, const int32_t player, struct list_head *player_list_head, struct list_head *build_list_head){
 
 	Player{
 		printf("你的手牌:\n");
@@ -1026,19 +1292,19 @@ void Counciler_func(const int32_t sp, const int32_t player, struct list_head *pl
 		if(sp_option == 1)//特權
 		drawnum = 5;
 		if(((sp_building >> 22) & 1 )== 1 && sp == 1)//圖書館
-		councile_Library(drawptr, player);
+		council_Library(drawptr, player);
 		if(((sp_building >> 20) & 1 )== 1)
 		Prefecture(choseptr, player);//辦公室
 		int32_t ar = 0;
 		if(((sp_building >> 19) & 1 )== 1)
 		ar = Archive(player);//檔案館
     
-		action = normal_councile(chosenum, drawnum, player_list_head, player, ar);//市長行動
+		action = normal_council(chosenum, drawnum, player_list_head, player, ar);//市長行動
 	}
 
 	return;
 }
-int32_t normal_councile(const int32_t chosenum, const int32_t drawnum, struct list_head *player_list_head, const int32_t player, const int32_t ar){
+int32_t normal_council(const int32_t chosenum, const int32_t drawnum, struct list_head *player_list_head, const int32_t player, const int32_t ar){
 	if(ar == 1){
 		int32_t handnum = print_handcard(player_list_head,0);
 		int32_t cards[drawnum+handnum];//手牌加抽牌數 存id
@@ -1174,7 +1440,7 @@ void Prefecture(int32_t *choseptr, const int32_t player){
 
 	return;
 }
-void councile_Library(int32_t *drawptr, const int32_t player){
+void council_Library(int32_t *drawptr, const int32_t player){
 	int8_t option = 0;
 
 	Player{
