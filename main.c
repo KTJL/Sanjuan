@@ -19,7 +19,7 @@ LIST_HEAD(build_list_head_2);
 LIST_HEAD(build_list_head_3);
 LIST_HEAD(build_list_head_4);
 
-int8_t game = 1;
+int32_t game = 1;
 int32_t playernum = 0;
 int32_t roundnum = 1;
 
@@ -59,22 +59,79 @@ int main(void) {
 	
 	else if(w == 3)
 	return 0;//結束
-
-  for(int32_t i = 0;i<5;i++)
+/*test
+  for(int32_t i = 0;i<4;i++)
 	{
 		gameround(roundnum, playernum, tradecards[roundnum%5], &player_list_head_1, &player_list_head_2, &player_list_head_3, &player_list_head_4, &build_list_head_1, &build_list_head_2, &build_list_head_3, &build_list_head_4);
 		roundnum++;
 	}
   
-/*
+*/
 	while(game)
 	{
-    gameround(roundnum);
+    game = gameround(roundnum, playernum, tradecards[roundnum%5], &player_list_head_1, &player_list_head_2, &player_list_head_3, &player_list_head_4, &build_list_head_1, &build_list_head_2, &build_list_head_3, &build_list_head_4);
+		if(game == 1)
 		roundnum++;
+	}
 
-    game = end_game();
-	}*/
- 
+	printf("\n\n\n結算分數!\n");
+  int32_t score[4] = {0};
+	int32_t commod[4] = {0};
+	struct list_head *listptr = NULL;
+	score[0] = score_count(&build_list_head_1, playernum == 1);
+  commod[0] = commodcount(&build_list_head_1);
+	printf("1 號玩家得分: %d分/ %d個貨物\n---\n", score[0], commod[0]);
+	score[1] = score_count(&build_list_head_2, playernum == 2);
+	commod[0] = commodcount(&build_list_head_2);
+	printf("2 號玩家得分: %d分/ %d個貨物\n---\n", score[1], commod[1]);
+	score[2] = score_count(&build_list_head_3, playernum == 3);
+	commod[0] = commodcount(&build_list_head_3);
+	printf("3 號玩家得分: %d分/ %d個貨物\n---\n", score[2], commod[2]);
+	score[3] = score_count(&build_list_head_4, playernum == 4);
+	commod[0] = commodcount(&build_list_head_4);
+	printf("4 號玩家得分: %d分/ %d個貨物\n---\n", score[3], commod[3]);
+
+	int32_t winner[4] = {1,2,3,4};
+	for(int32_t i = 0;i<4;i++){
+		for(int32_t j = i;j<4;j++){
+			if(score[i] < score[j]){
+				int32_t tmp = winner[i];
+				winner[i] = winner[j];
+				winner[j] = tmp;
+			}
+			else if(score[i] == score[j]){
+				if(commod[i]<commod[j]){
+					int32_t tmp = winner[i];
+				  winner[i] = winner[j];
+				  winner[j] = tmp;
+				}
+			}
+		}
+	} 
+
+	printf("!!!!最終結果!!!!\n");
+	for(int32_t i = 0;i<4;i++){
+		printf("第 %d 名: %d 號玩家", i+1, winner[i]);
+    for(int32_t j = i+1;j<4;j++){
+			if(score[i] == score[j] &&　commod[i] == commod[j]){
+				printf("、%d 號玩家", winner[j]);
+				i++;
+			}
+			else{
+				printf("\n");
+				break;
+			}
+		}
+	}
+
+	delAllplayercard(&player_list_head_1);
+	delAllplayercard(&build_list_head_1);
+	delAllplayercard(&player_list_head_2);
+	delAllplayercard(&build_list_head_2);
+	delAllplayercard(&player_list_head_3);
+	delAllplayercard(&build_list_head_3);
+	delAllplayercard(&player_list_head_4);
+	delAllplayercard(&build_list_head_4);
 
   return 0;
 }

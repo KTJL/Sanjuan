@@ -11,17 +11,7 @@ enum role_card
   Councilor,
 	Prospector,
 };
-/*
-typedef struct produce_building
-{
-	int32_t id;
-	char name[128];
-  int32_t fee;
-	int32_t score;
-	int32_t num;
 
-}_sfactory;
-*/
 typedef struct Building
 {
 	int32_t id;
@@ -31,7 +21,7 @@ typedef struct Building
 	int32_t num;
 	char tip[5096];
 
-}_sbuild;
+}__attribute__((packed)) _sbuild;
 
 typedef struct _cost_card
 {

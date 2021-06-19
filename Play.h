@@ -17,17 +17,20 @@ typedef struct Player_card
 	int32_t score;
   char tip[5096];
 	int32_t commodity;
+	int32_t vicpoint;
 
 	struct list_head list;
 	
-}_splayer_card;
+}__attribute__((packed)) _splayer_card;
 
 int32_t welcome();
 void start(struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4);
 
 _splayer_card *add_newcard(_sbuild *building);
 _sbuild *draw_card();
-void gameround(int32_t roundnum, const int32_t playernum, const int32_t tradecardnum, struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4);
+int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t tradecardnum, struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4);
+void Chapel(struct list_head *player_list_head, struct list_head *build_list_head, const int32_t player);//禮拜堂
+void Tower(struct list_head *player_list_head, struct list_head *build_list_head, const int32_t player);//塔樓
 
 void print_table(struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4,struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4, const int32_t player);//畫面
 int32_t print_handcard(struct list_head *player_list_head, const int32_t player);//印手牌、計算卡數
@@ -39,11 +42,11 @@ void lost_card(struct list_head *player_list_head, struct list_head *choosecard,
 void lost_commod(struct list_head *build_list_head, const int32_t player);//丟貨
 //建築師
 void Builder_func(const int32_t sp, const int32_t player, struct list_head *player_list_head, struct list_head *build_list_head);
-int32_t normal_build(int32_t cardfee, _splayer_card *choosecard, struct list_head *player_list_head, struct list_head *build_list_head, const int32_t player);
+int32_t normal_build(int32_t cardfee, _splayer_card *choosecard, struct list_head *player_list_head, struct list_head *build_list_head, const int32_t player, int32_t vicpoint);
 void Smithy(int32_t *feeptr, const int32_t player);
 void Poor_house(struct list_head *player_list_head, const int32_t player);
 void Black_market(struct list_head *build_list_head, int32_t *feeptr, int32_t commodnum, const int32_t player);
-void Crane(int32_t cardfee, int32_t *feeptr, struct list_head *build_list_head, const int32_t player);
+int32_t Crane(int32_t cardfee, int32_t *feeptr, struct list_head *build_list_head, const int32_t player);
 void Carpenter(struct list_head *player_list_head, const int32_t player);
 void Quarry(int32_t *feeptr, const int32_t player);
 void build_Library(int32_t *feeptr, const int32_t player);
@@ -72,7 +75,13 @@ int32_t normal_prospect(int32_t drawnum, struct list_head *player_list_head);
 void Gold_mine(struct list_head *player_list_head, const int32_t player);
 void prospect_Library(int32_t *drawptr, struct list_head *player_list_head,  const int32_t player);
 
-void delAllplayercard(struct list_head *player_list_head);
-/*
 int32_t end_game(struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4);
-*/
+
+//算分
+int32_t score_count(struct list_head *build_list_head, const int32_t player);
+int32_t commodcount(struct list_head *build_list_head);
+void Guild_hall(int32_t *sctmp, struct list_head *build_list_head, const int32_t player);
+void City_hall(int32_t *sctmp, struct list_head *build_list_head, const int32_t player);
+void Triumhal_arch(int32_t *sctmp, struct list_head *build_list_head, const int32_t player);
+//結束程式
+void delAllplayercard(struct list_head *player_list_head);
