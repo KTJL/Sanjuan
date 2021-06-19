@@ -5,9 +5,20 @@
 #include <unistd.h>
 #include "linuxlist.h"
 
-//#include "Play.h"
-//#include "Playn.h"
-//#include "Card.h"
+#define NONE "\033[m"
+#define RED "\033[0;32;31m"
+#define LIGHT_RED "\033[1;31m"
+#define GREEN "\033[0;32;32m"
+#define LIGHT_GREEN "\033[1;32m"
+#define BLUE "\033[0;32;34m"
+#define LIGHT_BLUE "\033[1;34m"
+#define DARY_GRAY "\033[1;30m"
+#define CYAN "\033[0;36m"
+#define LIGHT_CYAN "\033[1;36m"
+#define PURPLE "\033[0;35m"
+#define LIGHT_PURPLE "\033[1;35m"
+#define BROWN "\033[0;33m"
+#define YELLOW "\033[1;33m"
 
 LIST_HEAD(player_list_head_1);
 LIST_HEAD(player_list_head_2);
@@ -43,7 +54,7 @@ int main(void) {
     playernum = rand()%4;
 		if(playernum == 0)
     playernum = 4;
-	  printf("你的號碼為: %d號\n\n", playernum);
+	  printf(YELLOW"你的號碼為: %d號\n\n"NONE, playernum);
 		start(&player_list_head_1, &player_list_head_2, &player_list_head_3, &player_list_head_4, &build_list_head_1, &build_list_head_2, &build_list_head_3, &build_list_head_4);//開始
 		
 		for(int32_t i = 0;i<5;i++){//洗價物牌
@@ -74,7 +85,7 @@ int main(void) {
 		roundnum++;
 	}
 
-	printf("\n\n\n結算分數!\n");
+	printf(RED"\n\n\n遊戲結束!結算分數!\n"NONE);
   int32_t score[4] = {0};
 	int32_t commod[4] = {0};
 	struct list_head *listptr = NULL;
@@ -109,11 +120,11 @@ int main(void) {
 		}
 	} 
 
-	printf("!!!!最終結果!!!!\n");
+	printf(YELLOW"!!!!最終結果!!!!\n"NONE);
 	for(int32_t i = 0;i<4;i++){
 		printf("第 %d 名: %d 號玩家", i+1, winner[i]);
     for(int32_t j = i+1;j<4;j++){
-			if(score[i] == score[j] &&　commod[i] == commod[j]){
+			if(score[i] == score[j] && commod[i] == commod[j]){
 				printf("、%d 號玩家", winner[j]);
 				i++;
 			}

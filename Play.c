@@ -1,6 +1,20 @@
 #include "Play.h"
 #define Player if(player == 1)
 #define Robot if(player != 1)
+#define NONE "\033[m"
+#define RED "\033[0;32;31m"
+#define LIGHT_RED "\033[1;31m"
+#define GREEN "\033[0;32;32m"
+#define LIGHT_GREEN "\033[1;32m"
+#define BLUE "\033[0;32;34m"
+#define LIGHT_BLUE "\033[1;34m"
+#define DARY_GRAY "\033[1;30m"
+#define CYAN "\033[0;36m"
+#define LIGHT_CYAN "\033[1;36m"
+#define PURPLE "\033[0;35m"
+#define LIGHT_PURPLE "\033[1;35m"
+#define BROWN "\033[0;33m"
+#define YELLOW "\033[1;33m"
 
 int32_t welcome()
 {
@@ -13,7 +27,7 @@ int32_t welcome()
 	switch(option)
 	{
 		case 1:
-		  system("firefox gamerule.html");
+		  system("xdg-open rules.pdf");
 		case 2:
 			return 2;
 		  break;
@@ -169,7 +183,7 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 		print_table(player_list_head_1, player_list_head_2, player_list_head_3, player_list_head_4, build_list_head_1, build_list_head_2, build_list_head_3, build_list_head_4, playernum);//印牌桌
 		printf(">>>>>\n");
 		if(playernum%4 == i%4){//印玩家手牌
-			printf("你的手牌:\n");
+			printf(BLUE"你的手牌:\n"NONE);
 			switch(playernum){
 				case 1:
 				print_handcard(player_list_head_1, 1);
@@ -1437,12 +1451,12 @@ int32_t normal_council(const int32_t chosenum, const int32_t drawnum, struct lis
 		
 			printf("\n選擇想要收入的手牌---\n");
 			Player{
-				printf("編號 /名字\t/建設費用/得分\t/技能\n");
+				printf(BLUE"編號 /名字\t/建設費用/得分\t/技能\n");
 				for(int32_t j = 1;j<=drawnum+handnum;j++){
 					printf("%d\t/%s\t/\t  %d/\t%d\t/%s\n", j, building[cards[j-1] - 1].name, building[cards[j-1] - 1].fee, building[cards[j-1] - 1].score, building[cards[j-1] - 1].tip);
 				}
 				printf("(得分0為視情況得分)\n");
-				printf("\n(輸入卡片編號進行選擇):");
+				printf("\n(輸入卡片編號進行選擇):"NONE);
 				while(scanf("%d", &chose) != 1 || chose <= 0|| chose > drawnum+handnum || ((mark >> chose) & 1 )== 1)
 				{
 					char c;
@@ -1477,12 +1491,12 @@ int32_t normal_council(const int32_t chosenum, const int32_t drawnum, struct lis
 		
 			printf("\n選擇想要收入的手牌---\n");
 			Player{
-				printf("編號 /名字\t/建設費用/得分\t/技能\n");
+				printf(BLUE"編號 /名字\t/建設費用/得分\t/技能\n");
 				for(int32_t j = 1;j <= drawnum;j++){
 					printf("%d\t/%s\t/\t  %d/\t%d\t/%s\n", j, building[drawcard[j-1] - 1].name, building[drawcard[j-1] - 1].fee, building[drawcard[j-1]- 1].score, building[drawcard[j-1] - 1].tip);
 				}
 				printf("(得分0為視情況得分)\n");
-				printf("\n(輸入卡片編號進行選擇):");
+				printf("\n(輸入卡片編號進行選擇):"NONE);
 				while(scanf("%d", &chose) != 1 || chose <= 0|| chose > drawnum || ((mark >> chose) & 1 )== 1)
 				{
 					char c;
@@ -1725,7 +1739,7 @@ void prospect_Library(int32_t *drawptr, struct list_head *player_list_head,  con
 
 void print_table(struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4, const int32_t playernum)
 {
-	printf("----------牌桌----------\n");
+	printf(GREEN"----------牌桌----------\n");
 	for(int32_t i = 0;i<4;i++){
 		printf("%d", i+1);
 		if(playernum == i%4+1) printf("(YOU): ");
@@ -1758,13 +1772,14 @@ void print_table(struct list_head *player_list_head_1, struct list_head *player_
 		}
 	}
 	printf("(0:0個貨物(卡片)/1:1個貨物(卡片)/-1:無法生產貨物)\n");
-	printf("------------------------\n");
+	printf("------------------------\n"NONE);
+	sleep(3);
 	return;
 }
 int32_t print_handcard(struct list_head *player_list_head, const int32_t player)
 {
 	Player{
-		printf("\n編號 /名字\t/建設費用/得分\t/貨物\t/技能\n");
+		printf(BLUE"\n編號 /名字\t/建設費用/得分\t/貨物\t/技能\n");
 	}
   int32_t count = 1;
 	struct list_head *lisptr = NULL;
@@ -1776,7 +1791,7 @@ int32_t print_handcard(struct list_head *player_list_head, const int32_t player)
 		}
 		count++;
 	}
-	Player printf("(得分0為視情況得分)\n");
+	Player printf("(得分0為視情況得分)\n"NONE);
 
 	return count-1;
 }
