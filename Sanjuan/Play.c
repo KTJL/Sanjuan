@@ -567,7 +567,7 @@ void Chapel(struct list_head *player_list_head, struct list_head *build_list_hea
 		}
 	}
 
-	if(chapel == 1){
+	if(chapel == 1 && print_handcard(player_list_head, 0) > 0){
 		int8_t option = 0;
 	
 		Player{
@@ -586,6 +586,7 @@ void Chapel(struct list_head *player_list_head, struct list_head *build_list_hea
 		if(option == 1){
 			lost_card(player_list_head, NULL, player);
 			cptr->vicpoint ++;
+      printf("使用了禮拜堂!\n");
 		}
 	}
 
@@ -950,8 +951,9 @@ void Smithy(int32_t *feeptr, const int32_t player)
 		option = rand()%2 + 1;
 	}
 	
-	if(option == 1)
+	if(option == 1){
 	*feeptr -= 1;
+	printf("使用了鐵匠鋪!\n");}
 
 	return;
 }
@@ -977,6 +979,7 @@ void Poor_house(struct list_head *player_list_head, const int32_t player)
 		_sbuild *drawcard = draw_card();
 		_splayer_card *newcard = add_newcard(drawcard);
 		list_add(&(newcard->list), player_list_head);
+		printf("使用了救濟院!\n");
 
 		drawcard->num --;
 	}
@@ -1009,6 +1012,9 @@ void Black_market(struct list_head *build_list_head, int32_t *feeptr, int32_t co
 		lost_commod(build_list_head, player);
 	}
 	*feeptr -= option;
+	if(option > 0){
+		printf("使用了黑市!\n");
+	}
 
 	return;
 }
@@ -1045,6 +1051,7 @@ int32_t Crane(int32_t cardfee, int32_t *feeptr, struct list_head *build_list_hea
 		if(*feeptr < 0) *feeptr = 0;
 		list_del(&(lostbuild->list));
 		free(lostbuild);
+		printf("使用了起重機!\n");
 	}
 
 	return ret;
@@ -1073,6 +1080,7 @@ void Carpenter(struct list_head *player_list_head, const int32_t player)
 		list_add(&(newcard->list), player_list_head);
 
 		drawcard->num --;
+		printf("使用了木工場!\n");
 	}
 
 	return;
@@ -1094,8 +1102,11 @@ void Quarry(int32_t *feeptr, const int32_t player)
 		option = rand()%2 + 1;
 	}
 
-	if(option == 1)
-	*feeptr -= 1;
+	if(option == 1){
+		*feeptr -= 1;
+		printf("使用了採石場!\n");
+	}
+	
 
 	return;
 }
@@ -1118,6 +1129,7 @@ void build_Library(int32_t *feeptr, const int32_t player)
 	
 	if(option == 1)
 	{
+		printf("使用了圖書館!\n");
 		*feeptr -= 2;
 	}
 	
@@ -1276,6 +1288,7 @@ void Well(struct list_head *player_list_head, const int32_t player){
 		list_add(&(newcard->list), player_list_head);
 
 		drawcard->num --;
+		printf("使用了水井!\n");
 	}
 
 	return;
@@ -1296,8 +1309,11 @@ void Aqueduct(int32_t *comptr, int32_t player){
 		option = rand()%2 + 1;
 	}
 
-	if(option == 1)
-	*comptr += 1;
+	if(option == 1){
+		*comptr += 1;
+		printf("使用了溝渠!\n");
+	}
+	
 
 	return;
 }
@@ -1321,6 +1337,7 @@ void produce_Library(int32_t *comptr, int32_t facnum, const int32_t player){
 	
 	if(option <= 3 )
 	{
+		printf("使用了圖書館!\n");
 		*comptr = option;
 	}
 	
@@ -1489,6 +1506,7 @@ void Market_stand(struct list_head *player_list_head, const int32_t player){
 		list_add(&(newcard->list), player_list_head);
 
 		drawcard->num --;
+		printf("使用了攤販!\n");
 	}
 
 	return;
@@ -1516,6 +1534,7 @@ void Market_hall(struct list_head *player_list_head, const int32_t player){
 		list_add(&(newcard->list), player_list_head);
 
 		drawcard->num --;
+		printf("使用了市場!\n");
 	}
 
 	return;
@@ -1536,8 +1555,11 @@ void Trading_post(int32_t *soldptr, const int32_t player){
 		option = rand()%2 + 1;
 	}
 
-	if(option == 1)
-	*soldptr += 1;
+	if(option == 1){
+		*soldptr += 1;
+		printf("使用了交易所!\n");
+	}
+	
 
 	return;
 }
@@ -1561,6 +1583,7 @@ void trade_Library(int32_t *soldptr, int32_t commodnum, const int32_t player){
 	
 	if(option <= 3 )
 	{
+		printf("使用了圖書館!\n");
 		*soldptr = option;
 	}
 	
@@ -1764,8 +1787,11 @@ int32_t Archive(const int32_t player){
 		option = rand()%2 + 1;
 	}
 	
-	if(option == 1)
-	return 1;
+	if(option == 1){
+		printf("使用了檔案館!\n");
+		return 1;
+	}
+	
 
 	return 0;
 }
@@ -1785,8 +1811,11 @@ void Prefecture(int32_t *choseptr, const int32_t player){
 		option = rand()%2 + 1;
 	}
 	
-	if(option == 1)
-	*choseptr = 2;
+	if(option == 1){
+		printf("使用了辦公處!\n");
+		*choseptr = 2;
+	}
+	
 
 	return;
 }
@@ -1808,6 +1837,7 @@ void council_Library(int32_t *drawptr, const int32_t player){
 	
 	if(option == 1)
 	{
+		printf("使用了圖書館!\n");
 		*drawptr = 8;
 	}
 	
@@ -1908,6 +1938,7 @@ void Gold_mine(struct list_head *player_list_head, const int32_t player){
 			drawcard[i].fee = drawbuild->fee;
 
 			drawbuild->num --;
+			printf("使用了金礦坑!\n");
 		}
 
 		int32_t same = 0;//是否有相同費用
@@ -1969,6 +2000,7 @@ void prospect_Library(int32_t *drawptr, struct list_head *player_list_head,  con
 	
 	if(option == 1)
 	{
+		printf("使用了圖書館!\n");
 		*drawptr = 2;
 	}
 	
@@ -2192,7 +2224,9 @@ int32_t end_game(struct list_head *build_list_head_1, struct list_head *build_li
 void *timer(){
 	signal(SIGALRM,handler); 
 	alarm(30);
-
+  if(alrm == 0)
+	alarm(0);
+	
 	return 0;
 }
 void handler(int signo){
