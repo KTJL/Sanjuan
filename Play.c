@@ -16,6 +16,8 @@
 #define BROWN "\033[0;33m"
 #define YELLOW "\033[1;33m"
 
+int32_t alrm = 1;
+
 int32_t welcome()
 {
 	printf("歡迎遊玩聖胡安桌遊\n");
@@ -130,7 +132,7 @@ _sbuild *draw_card()//抽卡
 	return drawcard;
 }
 
-int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t tradecardnum, struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4)
+int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t tradecardnum, struct list_head *player_list_head_1, struct list_head *player_list_head_2, struct list_head *player_list_head_3, struct list_head *player_list_head_4, struct list_head *build_list_head_1, struct list_head *build_list_head_2, struct list_head *build_list_head_3, struct list_head *build_list_head_4, const int32_t level)
 {
 	printf("-----------------\nRound %d\n\n", roundnum);
   
@@ -202,7 +204,6 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 				break;
 			}
 		}
-		
 		player_role[i%4] = choose_role(choseptr, playernum%4 == i%4);
 		chose_role = chose_role | (1 << player_role[i%4]);
     if(player_role[i%4]-1 == Builder)
@@ -214,16 +215,37 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 
 				if(j%4 == 0)printf("---\n 4 號玩家\n");
 				else printf("---\n %d 號玩家\n", j%4);
-				if(playernum%4 != j%4) sleep(5);
 
-				if(j%4 == 0 && list_empty(player_list_head_4) == 0)
-				Builder_func(j == i%4, playernum%4 == j%4,  player_list_head_4, build_list_head_4);
-				else if(j%4 == 1 && list_empty(player_list_head_1) == 0)
-        Builder_func(j == i%4, playernum%4 == j%4,  player_list_head_1, build_list_head_1);
-				else if(j%4 == 2 && list_empty(player_list_head_2) == 0)
-				Builder_func(j == i%4, playernum%4 == j%4,  player_list_head_2, build_list_head_2);
-				else if(j%4 == 3 && list_empty(player_list_head_3) == 0)
-				Builder_func(j == i%4, playernum%4 == j%4,  player_list_head_3, build_list_head_3);
+				if(playernum%4 != j%4) sleep(5);
+				if(level == 2 && playernum%4 == j%4){
+					pthread_t thread_timer, thread_func;
+					lv2 tmp;
+					alrm = 1;
+          if(j%4 == 0 && list_empty(player_list_head_4) == 0){
+          tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_4; tmp.build_list_head = build_list_head_4;}
+					else if(j%4 == 1 && list_empty(player_list_head_1) == 0){
+					tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_1; tmp.build_list_head = build_list_head_1;}
+					else if(j%4 == 2 && list_empty(player_list_head_2) == 0){
+					tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_2; tmp.build_list_head = build_list_head_2;}
+					else if(j%4 == 3 && list_empty(player_list_head_3) == 0){
+					tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_3; tmp.build_list_head = build_list_head_3;}
+
+					pthread_create(&thread_timer, NULL, timer, NULL);
+					pthread_create(&thread_func,NULL, Builder_func2, (void *)&tmp);
+					while(alrm){sleep(1);}
+					pthread_cancel(thread_func);
+					pthread_cancel(thread_timer);
+				}
+				if(level == 1 || (level == 2 && playernum%4 != j%4)){
+					if(j%4 == 0 && list_empty(player_list_head_4) == 0)
+					Builder_func(j == i%4, playernum%4 == j%4,  player_list_head_4, build_list_head_4);
+					else if(j%4 == 1 && list_empty(player_list_head_1) == 0)
+					Builder_func(j == i%4, playernum%4 == j%4,  player_list_head_1, build_list_head_1);
+					else if(j%4 == 2 && list_empty(player_list_head_2) == 0)
+					Builder_func(j == i%4, playernum%4 == j%4,  player_list_head_2, build_list_head_2);
+					else if(j%4 == 3 && list_empty(player_list_head_3) == 0)
+					Builder_func(j == i%4, playernum%4 == j%4,  player_list_head_3, build_list_head_3);
+				}
 			}
 		}
 		else if(player_role[i%4]-1 == Producer)
@@ -243,8 +265,22 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 						if(cptr->id <= 5 && cptr->commodity == 0)
 						facnum ++;
 					}
-					if(facnum != 0)
-					Producer_func(j == i%4, playernum%4 == j%4,  player_list_head_4, build_list_head_4, facnum);
+					if(facnum != 0){
+						if(level == 2 && playernum%4 == j%4){
+							pthread_t thread_timer, thread_func;
+							alrm = 1;
+							lv2 tmp;
+							tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_4; tmp.build_list_head = build_list_head_4; tmp.facnum = facnum;
+
+							pthread_create(&thread_timer, NULL, timer, NULL);
+							pthread_create(&thread_func,NULL, Producer_func2, (void *)&tmp);
+							while(alrm){sleep(1);}
+							pthread_cancel(thread_func);
+							pthread_cancel(thread_timer);						
+						}
+						else
+						Producer_func(j == i%4, playernum%4 == j%4,  player_list_head_4, build_list_head_4, facnum);
+					}
 				}
 				else if(j %4 == 1){
 					struct list_head *listptr = NULL;					
@@ -254,8 +290,22 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 						if(cptr->id <= 5 && cptr->commodity == 0)
 						facnum ++;
 					}
-					if(facnum != 0)
-					Producer_func(j == i%4, playernum%4 == j%4,  player_list_head_1, build_list_head_1, facnum);
+					if(facnum != 0){
+						if(level == 2 && playernum%4 == j%4){
+							pthread_t thread_timer, thread_func;
+							alrm = 1;
+							lv2 tmp;
+							tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_1; tmp.build_list_head = build_list_head_1; tmp.facnum = facnum;
+
+							pthread_create(&thread_timer, NULL, timer, NULL);
+							pthread_create(&thread_func,NULL, Producer_func2, (void *)&tmp);
+							while(alrm){sleep(1);}
+							pthread_cancel(thread_func);
+							pthread_cancel(thread_timer);						
+						}
+						else
+						Producer_func(j == i%4, playernum%4 == j%4,  player_list_head_1, build_list_head_1, facnum);
+					}
 				}
 				else if(j %4 == 2){
 					struct list_head *listptr = NULL;					
@@ -265,8 +315,22 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 						if(cptr->id <= 5 && cptr->commodity == 0)
 						facnum ++;
 					}
-					if(facnum != 0)
-					Producer_func(j == i%4, playernum%4 == j%4,  player_list_head_2, build_list_head_2, facnum);
+					if(facnum != 0){
+						if(level == 2 && playernum%4 == j%4){
+							pthread_t thread_timer, thread_func;
+							alrm = 1;
+							lv2 tmp;
+							tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_2; tmp.build_list_head = build_list_head_2; tmp.facnum = facnum;
+
+							pthread_create(&thread_timer, NULL, timer, NULL);
+							pthread_create(&thread_func,NULL, Producer_func2, (void *)&tmp);
+							while(alrm){sleep(1);}
+							pthread_cancel(thread_func);
+							pthread_cancel(thread_timer);						
+						}
+						else
+						Producer_func(j == i%4, playernum%4 == j%4,  player_list_head_2, build_list_head_2, facnum);
+					}
 				}
 				else if(j %4 == 3){
 					struct list_head *listptr = NULL;					
@@ -276,13 +340,32 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 						if(cptr->id <= 5 && cptr->commodity == 0)
 						facnum ++;
 					}
-					if(facnum != 0)
-					Producer_func(j == i%4, playernum%4 == j%4,  player_list_head_3, build_list_head_3, facnum);
+					if(facnum != 0){
+						if(level == 2 && playernum%4 == j%4){
+							pthread_t thread_timer, thread_func;
+							alrm = 1;
+							lv2 tmp;
+							tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_3; tmp.build_list_head = build_list_head_3; tmp.facnum = facnum;
+
+							pthread_create(&thread_timer, NULL, timer, NULL);
+							pthread_create(&thread_func,NULL, Producer_func2, (void *)&tmp);
+							while(alrm){sleep(1);}
+							pthread_cancel(thread_func);
+							pthread_cancel(thread_timer);						
+						}
+						else
+						Producer_func(j == i%4, playernum%4 == j%4,  player_list_head_3, build_list_head_3, facnum);
+					}
 				}
 			}
 		}
 		else if(player_role[i%4]-1 == Trader)
 		{
+			printf(RED"價格表: ");
+			for(int32_t k = 0;k<5;k++){
+				printf("%d  ", valuecards[tradecardnum].value[k]);
+			}
+			printf("\n"NONE);
 			for(int32_t j = i%4;j < (i%4) + 4;j++)
 			{
 				if(j%4 == 0)printf("---\n 4 號玩家\n");
@@ -298,8 +381,22 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 						if(cptr->commodity == 1)
 						commodnum ++;
 					}
-					if(commodnum != 0)
-					Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_4, build_list_head_4, commodnum);
+					if(commodnum != 0){
+						if(level == 2 && playernum%4 == j%4){
+							pthread_t thread_timer, thread_func;
+							alrm = 1;
+							lv2 tmp;
+							tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_4; tmp.build_list_head = build_list_head_4; tmp.commodnum = commodnum; tmp.tradercardnum = tradecardnum;
+
+							pthread_create(&thread_timer, NULL, timer, NULL);
+							pthread_create(&thread_func,NULL, Trader_func2, (void *)&tmp);
+							while(alrm){sleep(1);}
+							pthread_cancel(thread_func);
+							pthread_cancel(thread_timer);						
+						}
+						else
+						Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_4, build_list_head_4, commodnum);
+					}
 				}
 				else if(j %4 == 1){
 					struct list_head *listptr = NULL;					
@@ -309,8 +406,22 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 						if(cptr->commodity == 1)
 						commodnum ++;
 					}
-					if(commodnum != 0)
-					Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_1, build_list_head_1, commodnum);
+					if(commodnum != 0){
+						if(level == 2 && playernum%4 == j%4){
+							pthread_t thread_timer, thread_func;
+							alrm = 1;
+							lv2 tmp;
+							tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_1; tmp.build_list_head = build_list_head_1; tmp.commodnum = commodnum; tmp.tradercardnum = tradecardnum;
+
+							pthread_create(&thread_timer, NULL, timer, NULL);
+							pthread_create(&thread_func,NULL, Trader_func2, (void *)&tmp);
+							while(alrm){sleep(1);}
+							pthread_cancel(thread_func);
+							pthread_cancel(thread_timer);						
+						}
+						else
+						Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_1, build_list_head_1, commodnum);
+					}
 				}
 				else if(j %4 == 2){
 					struct list_head *listptr = NULL;					
@@ -320,8 +431,22 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 						if(cptr->commodity == 1)
 						commodnum ++;
 					}
-					if(commodnum != 0)
-					Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_2, build_list_head_2, commodnum);
+					if(commodnum != 0){
+						if(level == 2 && playernum%4 == j%4){
+							pthread_t thread_timer, thread_func;
+							alrm = 1;
+							lv2 tmp;
+							tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_2; tmp.build_list_head = build_list_head_2; tmp.commodnum = commodnum; tmp.tradercardnum = tradecardnum;
+
+							pthread_create(&thread_timer, NULL, timer, NULL);
+							pthread_create(&thread_func,NULL, Trader_func2, (void *)&tmp);
+							while(alrm){sleep(1);}
+							pthread_cancel(thread_func);
+							pthread_cancel(thread_timer);						
+						}
+						else
+						Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_2, build_list_head_2, commodnum);
+					}
 				}
 				else if(j %4 == 3){
 					struct list_head *listptr = NULL;					
@@ -331,8 +456,22 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 						if(cptr->commodity == 1)
 						commodnum ++;
 					}
-					if(commodnum != 0)
-					Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_3, build_list_head_3, commodnum);
+					if(commodnum != 0){
+						if(level == 2 && playernum%4 == j%4){
+							pthread_t thread_timer, thread_func;
+							alrm = 1;
+							lv2 tmp;
+							tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_3; tmp.build_list_head = build_list_head_3; tmp.commodnum = commodnum; tmp.tradercardnum = tradecardnum;
+
+							pthread_create(&thread_timer, NULL, timer, NULL);
+							pthread_create(&thread_func,NULL, Trader_func2, (void *)&tmp);
+							while(alrm){sleep(1);}
+							pthread_cancel(thread_func);
+							pthread_cancel(thread_timer);						
+						}
+						else
+						Trader_func(j == i%4, playernum%4 == j%4,  tradecardnum, player_list_head_3, build_list_head_3, commodnum);
+					}
 				}
 			}
 		}
@@ -344,28 +483,69 @@ int32_t gameround(int32_t roundnum, const int32_t playernum, const int32_t trade
 				else printf("---\n %d 號玩家\n", j%4);
 				if(playernum%4 != j%4) sleep(5);
 
-				if(j%4 == 0)
-				Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_4, build_list_head_4);
-				else if(j%4 == 1)
-        Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_1, build_list_head_1);
-				else if(j%4 == 2)
-				Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_2, build_list_head_2);
-				else if(j%4 == 3)
-				Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_3, build_list_head_3);
+				if(level == 2 && playernum%4 == j%4){
+					pthread_t thread_timer, thread_func;
+					lv2 tmp;
+					alrm = 1;
+          if(j%4 == 0 && list_empty(player_list_head_4) == 0){
+          tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_4; tmp.build_list_head = build_list_head_4;}
+					else if(j%4 == 1 && list_empty(player_list_head_1) == 0){
+					tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_1; tmp.build_list_head = build_list_head_1;}
+					else if(j%4 == 2 && list_empty(player_list_head_2) == 0){
+					tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_2; tmp.build_list_head = build_list_head_2;}
+					else if(j%4 == 3 && list_empty(player_list_head_3) == 0){
+					tmp.sp = j == i%4; tmp.player = playernum%4 == j%4; tmp.player_list_head = player_list_head_3; tmp.build_list_head = build_list_head_3;}
+
+					pthread_create(&thread_timer, NULL, timer, NULL);
+					pthread_create(&thread_func,NULL, Councilor_func2, (void *)&tmp);
+					while(alrm){sleep(1);}
+					pthread_cancel(thread_func);
+					pthread_cancel(thread_timer);
+				}
+				if(level == 1 || (level == 2 && playernum%4 != j%4)){
+					if(j%4 == 0)
+					Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_4, build_list_head_4);
+					else if(j%4 == 1)
+					Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_1, build_list_head_1);
+					else if(j%4 == 2)
+					Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_2, build_list_head_2);
+					else if(j%4 == 3)
+					Councilor_func(j == i%4, playernum%4 == j%4,  player_list_head_3, build_list_head_3);}
 			}
 		}
 		else if(player_role[i%4]-1 == Prospector)
 		{
 			if(playernum%4 != i%4) sleep(5);
 
-			if(i%4 == 0)
-			Prospector_func( playernum%4 == i%4, player_list_head_4, build_list_head_4);
-			else if(i%4 == 1)
-			Prospector_func( playernum%4 == i%4, player_list_head_1, build_list_head_1);
-			else if(i%4 == 2)
-			Prospector_func( playernum%4 == i%4, player_list_head_2, build_list_head_2);
-			else if(i%4 == 3)
-			Prospector_func( playernum%4 == i%4, player_list_head_3, build_list_head_3);
+			if(level == 2 && playernum%4 == i%4){
+				pthread_t thread_timer, thread_func;
+				lv2 tmp;
+				alrm = 1;
+        if(i%4 == 0 && list_empty(player_list_head_4) == 0){
+          tmp.player = playernum%4 == i%4; tmp.player_list_head = player_list_head_4; tmp.build_list_head = build_list_head_4;}
+				else if(i%4 == 1 && list_empty(player_list_head_1) == 0){
+					tmp.player = playernum%4 == i%4; tmp.player_list_head = player_list_head_1; tmp.build_list_head = build_list_head_1;}
+				else if(i%4 == 2 && list_empty(player_list_head_2) == 0){
+					tmp.player = playernum%4 == i%4; tmp.player_list_head = player_list_head_2; tmp.build_list_head = build_list_head_2;}
+				else if(i%4 == 3 && list_empty(player_list_head_3) == 0){
+					tmp.player = playernum%4 == i%4; tmp.player_list_head = player_list_head_3; tmp.build_list_head = build_list_head_3;}
+
+				pthread_create(&thread_timer, NULL, timer, NULL);
+				pthread_create(&thread_func,NULL, Prospector_func2, (void *)&tmp);
+				while(alrm){sleep(1);}
+				pthread_cancel(thread_func);
+				pthread_cancel(thread_timer);
+			}
+			if(level == 1 || (level == 2 && playernum%4 != i%4)){
+				if(i%4 == 0)
+				Prospector_func( playernum%4 == i%4, player_list_head_4, build_list_head_4);
+				else if(i%4 == 1)
+				Prospector_func( playernum%4 == i%4, player_list_head_1, build_list_head_1);
+				else if(i%4 == 2)
+				Prospector_func( playernum%4 == i%4, player_list_head_2, build_list_head_2);
+				else if(i%4 == 3)
+				Prospector_func( playernum%4 == i%4, player_list_head_3, build_list_head_3);
+			}
 		}
 		
 	}
@@ -489,22 +669,22 @@ uint32_t choose_role(uint32_t *choseptr, uint32_t player)//選角
 			role = rand()%5 + 1;
 		}
 	}
-  printf("職業: ");
+  printf(RED"職業: ");
 	switch(role){
 		case 1:
-			printf("建築師\n");
+			printf("建築師\n"NONE);
 			break;
 		case 2:
-			printf("生產者\n");
+			printf("生產者\n"NONE);
 			break;
 		case 3:
-			printf("商人\n");
+			printf("商人\n"NONE);
 			break;
 		case 4:
-			printf("市長\n");
+			printf("市長\n"NONE);
 			break;
 		case 5:
-			printf("淘金者\n");
+			printf("淘金者\n"NONE);
 			break;
 		default:
 			break;
@@ -698,6 +878,18 @@ void Builder_func(const int32_t sp, const int32_t player,  struct list_head *pla
 	}
 
 	return;
+}
+void *Builder_func2(void *arg)
+{
+	const int32_t sp = ((lv2 *)arg)->sp;
+	const int32_t player = ((lv2 *)arg)->player;
+	struct list_head *player_list_head = ((lv2 *)arg)->player_list_head;
+	struct list_head *build_list_head = ((lv2 *)arg)->build_list_head;
+
+	Builder_func(sp, player, player_list_head, build_list_head);
+
+  alrm = 0;
+	return 0;
 }
 int32_t normal_build(int32_t cardfee, _splayer_card *choosecard, struct list_head *player_list_head, struct list_head *build_list_head, const int32_t player, int32_t vicpoint)
 {	//printf("347\n");
@@ -1043,6 +1235,18 @@ void Producer_func(const int32_t sp, const int32_t player, struct list_head *pla
 
 	return;
 }
+void * Producer_func2(void *arg){
+	const int32_t sp = ((lv2 *)arg)->sp;
+	const int32_t player = ((lv2 *)arg)->player;
+	struct list_head *player_list_head = ((lv2 *)arg)->player_list_head;
+	struct list_head *build_list_head = ((lv2 *)arg)->build_list_head;
+	int32_t facnum = ((lv2 *)arg)->facnum;
+
+	Producer_func(sp, player, player_list_head, build_list_head, facnum);
+
+  alrm = 0;
+	return 0;
+}
 int32_t normal_produce(_splayer_card *choosecard, struct list_head *build_list_head, const int32_t player){
 	choosecard->commodity = 1;
 	_sbuild *commod = draw_card();
@@ -1233,6 +1437,19 @@ void Trader_func(const int32_t sp, const int32_t player, const int32_t tradecard
 	}
 
 	return;
+}
+void *Trader_func2(void *arg){
+	const int32_t sp = ((lv2 *)arg)->sp;
+	const int32_t player = ((lv2 *)arg)->player;
+	const int32_t tradercardnum = ((lv2 *)arg)->tradercardnum;
+	struct list_head *player_list_head = ((lv2 *)arg)->player_list_head;
+	struct list_head *build_list_head = ((lv2 *)arg)->build_list_head;
+	int32_t commodnum = ((lv2 *)arg)->commodnum;
+
+	Trader_func(sp, player, tradercardnum, player_list_head, build_list_head, commodnum);
+
+  alrm = 0;
+	return 0;
 }
 int32_t normal_trade(_splayer_card *choosecard, struct list_head *player_list_head,const int32_t player, const int32_t tradecardnum){
 
@@ -1425,6 +1642,17 @@ void Councilor_func(const int32_t sp, const int32_t player, struct list_head *pl
 	}
 
 	return;
+}
+void *Councilor_func2(void *arg){
+	const int32_t sp = ((lv2 *)arg)->sp;
+	const int32_t player = ((lv2 *)arg)->player;
+	struct list_head *player_list_head = ((lv2 *)arg)->player_list_head;
+	struct list_head *build_list_head = ((lv2 *)arg)->build_list_head;
+
+	Councilor_func(sp, player, player_list_head, build_list_head);
+
+  alrm = 0;
+	return 0;
 }
 int32_t normal_council(const int32_t chosenum, const int32_t drawnum, struct list_head *player_list_head, const int32_t player, const int32_t ar){
 	if(ar == 1){
@@ -1634,6 +1862,16 @@ void Prospector_func(const int32_t player, struct list_head *player_list_head, s
 	}
 
 	return;
+}
+void *Prospector_func2(void *arg){
+	const int32_t player = ((lv2 *)arg)->player;
+	struct list_head *player_list_head = ((lv2 *)arg)->player_list_head;
+	struct list_head *build_list_head = ((lv2 *)arg)->build_list_head;
+
+	Prospector_func(player, player_list_head, build_list_head);
+
+  alrm = 0;
+	return 0;
 }
 int32_t normal_prospect(int32_t drawnum, struct list_head *player_list_head){
 
@@ -1949,4 +2187,15 @@ int32_t end_game(struct list_head *build_list_head_1, struct list_head *build_li
 		}
 	}
 	return game;
+}
+
+void *timer(){
+	signal(SIGALRM,handler); 
+	alarm(30);
+
+	return 0;
+}
+void handler(int signo){
+	printf(RED"\n時間到!終止操作!\n"NONE);
+	alrm = 0;
 }

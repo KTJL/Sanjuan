@@ -45,16 +45,24 @@ int main(void) {
   //遊戲開啟
 	int32_t tradecards[5] = {0};
 	int8_t trademk = 0;
+	int32_t level = 1;
 	if(w == 2)
 	{
 		printf("遊戲開始!( Ctrl+C 可隨時結束遊戲:) )\n\n");
+
+		printf(RED"請選擇遊戲難度:\n1) 普通版(無時間限制)\n2) 燒腦版(操作限時30秒)\n(請輸入數字進行選擇):"NONE);
+		while(scanf("%d", &level) != 1 || level < 1 || level > 2){
+			char c;
+			while (( c = getchar()) != EOF && c != '\n'){}
+			printf("無效選擇!(請輸入數字進行選擇):");
+		}
   
 		srand(time(0));
 
     playernum = rand()%4;
 		if(playernum == 0)
     playernum = 4;
-	  printf(YELLOW"你的號碼為: %d號\n\n"NONE, playernum);
+	  printf(YELLOW"\n\n你的號碼為: %d號\n\n"NONE, playernum);
 		start(&player_list_head_1, &player_list_head_2, &player_list_head_3, &player_list_head_4, &build_list_head_1, &build_list_head_2, &build_list_head_3, &build_list_head_4);//開始
 		
 		for(int32_t i = 0;i<5;i++){//洗價物牌
@@ -80,7 +88,7 @@ int main(void) {
 */
 	while(game)
 	{
-    game = gameround(roundnum, playernum, tradecards[roundnum%5], &player_list_head_1, &player_list_head_2, &player_list_head_3, &player_list_head_4, &build_list_head_1, &build_list_head_2, &build_list_head_3, &build_list_head_4);
+    game = gameround(roundnum, playernum, tradecards[roundnum%5], &player_list_head_1, &player_list_head_2, &player_list_head_3, &player_list_head_4, &build_list_head_1, &build_list_head_2, &build_list_head_3, &build_list_head_4, level);
 		if(game == 1)
 		roundnum++;
 	}

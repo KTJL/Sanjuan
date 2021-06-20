@@ -1,5 +1,5 @@
 all:Play.o
-	gcc main.c Play.o -o main
+	gcc -pthread -lm main.c Play.o -o main
 
 Play:
-	gcc -c Play.c -o Play.o
+	gcc -c -pthread -lm Play.c -o Play.o 
